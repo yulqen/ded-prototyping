@@ -13,18 +13,28 @@
 
 ;; creating records
 (defrecord Site [name location rp])
-(defrecord Person [fname lname])
+(defrecord Person [fname lname email mobile])
 
 ;; func to create site, based on the records
 (defn make-site [name location ^Person rp]
   (->Site name location rp))
 
 ;; create a site
-(def rrdl (make-site "Rosyth" "Rosyth Royal Dockyard" (->Person "Harold" "Clype")))
+(def rrdl (make-site "Rosyth" "Rosyth Royal Dockyard"
+                     (->Person
+                      "Harold"
+                      "Clype"
+                      "toss@toss.com"
+                      "07004 465462")))
 
 ;; create another site
 (def baes
-  (->Site "BAES Barrow" "Barrow-in-Furness" (->Person "Todd" "Larken")))
+  (->Site "BAES Barrow" "Barrow-in-Furness"
+          (->Person
+           "Todd"
+           "Larken"
+           "toss@tonks.com"
+           "07866 046516")))
 
 ;; get the RP for each site
 (defn get-rps [& sites]
@@ -57,8 +67,22 @@
                           (keyword (first headers))]
                          [(first f) (read-string (last f))])))))
 
+;; parse dsc csv to records
+(defrecord DSC [id name])
+
+;; func to convert the csv into a vector of DSC records
+(defn parse-csv-to-records [fn]
+  (let [data (with-open [reader (io/reader fn)]
+               (doall
+                (csv/read-csv reader)))
+        headers (first data)
+        fields (rest data)]
+    (vec (for [f fields]
+       (->DSC (read-string (last f)) (first f))))))
+
+
 ;; check that the func works
-(parse-csv "dscs.csv")
+(parse-csv-to-records "dscs.csv")
 
 
 
