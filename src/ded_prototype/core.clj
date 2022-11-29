@@ -3,17 +3,19 @@
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]))
 
-(def fields (let [csv-data (with-open [reader (io/reader "dscs.csv")]
-                             (doall
-                              (csv/read-csv reader)))
-                  csv-headers (first csv-data)
-                  csv-fields (rest csv-data)]
-              (for [f csv-fields]
-                (hash-map :id (read-string (last f)) :name (first f)))))
+(defn parse-csv [fn]
+  (let [data (with-open [reader (io/reader fn)]
+               (doall
+                (csv/read-csv reader)))
+        headers (first data)
+        fields (rest data)]
+    (for [f fields]
+      (apply assoc {}
+             (interleave [(keyword (last headers))
+                          (keyword (first headers))]
+                         [(first f) (read-string (last f))])))))
 
-
-fields
-
+(parse-csv "dscs.csv")
 
 
 
